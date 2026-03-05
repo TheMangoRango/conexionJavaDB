@@ -40,5 +40,77 @@ e.printStackTrace();
 }
 }
 
+private boolean customerExists(int id) {
+   try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
+      String sql = "SELECT COUNT(*) FROM customers WHERE id = ?";
+      try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+         stmt.setInt(1, id);
+         try (ResultSet rs = stmt.executeQuery()) {
+            return rs.next() && rs.getInt(1) > 0;
+         }
+      }
+   }
+   catch (SQLException e) {
+      e.printStackTrace();
+   }
+
+   return false;
+}
+
+public void readCustomer() {
+   try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
+      String sql = "select cus.* from customers cus;";
+      try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+         System.out.println("\n Usuarios en MySQL:");
+         while (rs.next()) {
+            System.out.println(new Customer(rs.getInt("id"),
+            rs.getString("first_name"),
+            rs.getString("last_name"),
+            rs.getInt("age"),
+            rs.getString("email")).toStringPersonalizado());
+         }
+      }
+   } catch (SQLException e) {
+      e.printStackTrace();
+   }
+}
+
+public void updateCustomer(int id, String newFirstName) {
+   try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
+      String sql = "update customers set first_name = ? where id = ?";
+      try(PreparedStatement stmt = connection.prepareStatement(sql)) {
+         stmt.setString(1, newFirstName);
+         stmt.setInt(2, id);
+         int rowsUpdated = stmt.executeUpdate();
+         if(rowsUpdated > 0) {
+         System.out.println("Customer id: " + id + " updated to: " + newFirstName);
+         }
+         else {
+            System.out.println("Customer id not found");
+         }
+      }
+   } catch(SQLException e) {
+      e.printStackTrace();
+   }
+}
+
+public void deleteCustomer(int id) {
+   try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD)) {
+      String sql = "delete from customers where id = ?";
+      try(PreparedStatement stmt = connection.prepareStatement(sql)) {
+         stmt.setInt(1, id);
+         int rowsDeleted = stmt.executeUpdate();
+         if(rowsDeleted > 0) {
+         System.out.println("Customer id: " + id + " deleted");
+         }
+         else {
+            System.out.println("Customer id not found");
+         }
+      }
+   } catch (SQLException e) {
+      e.printStackTrace();
+   }
+}
+
 
 }
